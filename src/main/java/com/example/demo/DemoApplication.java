@@ -15,9 +15,9 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
-	@RequestMapping("/")
-	public String viewCatalog() {
-		return "hello";
-	}
+	//@RequestMapping("/")
+	//public String viewCatalog() {
+	//	return "hello";
+	//}
 
 }
