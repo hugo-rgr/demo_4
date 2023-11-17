@@ -9,6 +9,8 @@ import javax.persistence.*;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import java.util.Optional;
+
 @Entity
 @Table
 @Setter
@@ -38,5 +40,6 @@ public class Product {
     @JoinColumn(name="promotion_id")
     @NotFound(action= NotFoundAction.IGNORE)
     private Promotion promotion;
+
 
 }

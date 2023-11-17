@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+  <div class="container-fluid">
+    <a class="navbar-brand" th:href="@{/}">Mercadona</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" th:href="@{/logout}">Déconnexion</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Product table -->
+<div class="container mt-5">
+  <h2>Produits</h2>
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">Créer un produit</button>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Product Label</th>
+          <th>Category Label</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Image</th>
+          <th>Discount Percentage</th>
+          <th>Discount Dates</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="productTableBody">
+        <!-- Dynamic display of products -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal for adding products -->
+<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductModalLabel">Créer un produit</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="productLabel">Nom du produit</label>
+          <input type="text" class="form-control" id="productLabel" required>
+        </div>
+        <div class="form-group">
+          <label for="productCategoryLabel">Catégorie</label>
+          <input type="text" class="form-control" id="productCategoryLabel" required>
+        </div>
+        <div class="form-group">
+          <label for="productPrice">Price</label>
+          <input type="number" min="0" class="form-control" id="productPrice" required>
+        </div>
+        <div class="form-group">
+          <label for="productDescription">Description</label>
+          <input type="text" class="form-control" id="productDescription" required>
+        </div>
+        <div class="form-group">
+          <label for="productImageURL">Image URL</label>
+          <input type="text" class="form-control" id="productImageURL" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+        <button type="button" class="btn btn-primary" id="saveProduct">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- Modal for adding promotions -->
+<div class="modal fade" id="addPromotionModal" tabindex="-1" role="dialog" aria-labelledby="addPromotionModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addPromotionModalLabel">Ajouter une promotion</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="productPromotionDp">Pourcentage de promotion</label>
+          <input type="number" min="0" max="100" class="form-control" id="productPromotionDp" required>
+        </div>
+        <div class="form-group">
+          <label for="productPromotionStart">Date de début</label>
+          <input type="date" class="form-control" id="productPromotionStart" required>
+        </div>
+        <div class="form-group">
+          <label for="productPromotionEnd">Date de fin</label>
+          <input type="date" class="form-control" id="productPromotionEnd" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+        <button type="button" class="btn btn-primary" id="savePromotion">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  $(document).ready(function () {
+    // Fetch and display products and associated promotions
+    function fetchProducts() {
+      $.ajax({
+        url: '/product/getAll',
+        method: 'GET',
+        success: function (data) {
+          $('#productTableBody').empty();
+          data.forEach(function (product) {
+            $('#productTableBody').append('<tr data-id="' + product.id + '"><td>' + product.label + '</td>' +
+                    '<td data-id="' + product.category.id + '">' + (product.category.label) + '</td>' +
+                    '<td>' + (product.price + ' €') + '</td>' +
+                    '<td>' + (product.description ? product.description : '') + '</td>' +
+                    '<td><img data-id="' + product.imageURL + '" src="' + product.imageURL +'" alt="Image" class="img-fluid" style="max-width: 150px; max-height: 100px;"></td>' +
+                    '<td>' + (product.promotion ? product.promotion.discountPercentage + '%' : '') + '</td>' +
+                    '<td>' + (product.promotion ? product.promotion.startDate + ' to ' + product.promotion.endDate : '') + '</td>' +
+                    '<td><button class="btn btn-danger btn-sm addPromotion">Promotion</button></td>' +
+                    '</tr>');
+          });
+        },
+        error: function (error) {
+          console.error('Error fetching products:', error);
+        }
+      });
+    }
+
+    fetchProducts();
+
+
+    // Show add product modal
+    $('#addProductModal').on('shown.bs.modal', function () {
+      $('#productLabel').val('');
+      $('#productCategoryLabel').val('');
+      $('#productPrice').val('');
+      $('#productDescription').val('');
+      $('#productImageURL').val('');
+    });
+
+    // Save Product
+    $('#saveProduct').on('click', function () {
+      var productLabel = $('#productLabel').val();
+      var productCategoryLabel = $('#productCategoryLabel').val();
+      var productPrice = $('#productPrice').val();
+      productPrice = parseFloat(productPrice).toFixed(2);
+      var productDescription = $('#productDescription').val();
+      var productImageURL = $('#productImageURL').val();
+
+
+      if (productLabel && !isNaN(productPrice) && productCategoryLabel) {
+
+        $.ajax({
+          url: '/category/getAll',
+          type: 'GET',
+          dataType: 'json',
+          success: function (categories) {
+
+            // if productCategoryLabel in category
+            var productCategoryId = null;
+
+            var found = false;
+            for(var i = 0; i < categories.length; i++){
+              if(found == false && categories[i].label === productCategoryLabel){
+                productCategoryId = categories[i].id;
+                found = true;
+              }
+            }
+
+            if(found == true) {
+              var res = JSON.stringify({
+                "label": productLabel,
+                "description": productDescription,
+                "price": productPrice,
+                "imageURL": productImageURL,
+                "category": {"id": productCategoryId, "label": productCategoryLabel}
+              });
+              $.ajax({
+                url: '/product/create',
+                method: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: res,
+                success: function () {
+                  $('#addProductModal').modal('hide');
+                  fetchProducts();
+                },
+                error: function (error) {
+                  console.error('Error adding product:', error);
+                }
+              });
+            } else {
+              alert("Veuillez entrer un nom de produit, un nom de catégorie existant et un prix");
+            }
+          }
+        });
+      } else {
+        alert("Veuillez entrer un nom de produit, un nom de catégorie existant et un prix");
+      }
+
+    });
+
+
+
+
+
+
+
+
+
+
+    // Show add promotion modal
+    $('#addPromotionModal').on('shown.bs.modal', function () {
+      $('#productPromotionDp').val('');
+      $('#productPromotionStart').val('');
+      $('#productPromotionEnd').val('');
+    });
+
+
+    // Save a Promotion
+    $(document).on('click', '.addPromotion', function () {
+
+      $('#addPromotionModal').modal('show');
+
+      var productId = $(this).closest('tr').data('id');
+      var productLabel = $(this).closest('tr').find('td:nth-child(1)').text();
+      var categoryId = $(this).closest('tr').find('td:nth-child(2)').data('id');
+      var categoryLabel = $(this).closest('tr').find('td:nth-child(2)').text();
+      var productPrice = $(this).closest('tr').find('td:nth-child(3)').text();
+      productPrice = productPrice.slice(0, -2);
+      var productDescription = $(this).closest('tr').find('td:nth-child(4)').text();
+      var productImageURL = $(this).closest('tr').find('td:nth-child(5) img').prop('src');
+
+      $('#savePromotion').on('click', function () {
+
+        var productPromotionDp = $('#productPromotionDp').val();
+        productPromotionDp = parseInt(productPromotionDp).toFixed(0);
+        var productPromotionStart = $('#productPromotionStart').val();
+        var productPromotionEnd = $('#productPromotionEnd').val();
+
+        if ((!isNaN(productPromotionDp)) || productPromotionStart || productPromotionEnd) {
+          if ((!isNaN(productPromotionDp)) && productPromotionStart && productPromotionEnd && productPromotionStart <= productPromotionEnd) {
+            $.ajax({
+              url: '/promotion/create',
+              method: 'POST',
+              contentType: "application/json; charset=utf-8",
+              data: JSON.stringify({
+                "discountPercentage": productPromotionDp,
+                "startDate": productPromotionStart,
+                "endDate": productPromotionEnd
+              }),
+              success: function (createdProm) {
+                editProduct(productId, productLabel, categoryId, categoryLabel, productPrice, productDescription, productImageURL, createdProm);
+              },
+              error: function (error) {
+                console.error('Error adding promotion:', error);
+              }
+            });
+          }
+        } else {
+            alert("Veuillez saisir une promotion valide");
+        }
+
+      });
+
+
+
+    });
+
+    // Update a product after applying the promotion
+    function editProduct(productId, productLabel, categoryId, categoryLabel, productPrice, productDescription, productImageURL, createdPromotion = null){
+
+      var res = JSON.stringify({"id":productId, "label":productLabel, "description":productDescription, "price":productPrice, "imageURL":productImageURL,
+        "promotion":createdPromotion, "category":{"id":categoryId, "label":categoryLabel}});
+
+      $.ajax({
+        url: '/product/update/' + productId,
+        method: 'PUT',
+        contentType: "application/json; charset=utf-8",
+        data: res,
+        success: function () {
+          $('#addPromotionModal').modal('hide');
+          fetchProducts();
+        },
+        error: function (error) {
+          console.error('Error adding promotion:', error);
+        }
+      });
+    }
+
+
+  });
+
+
+
+</script>
+
+</body>
+</html>
