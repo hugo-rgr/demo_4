@@ -2,7 +2,7 @@ package com.example.demo.security.admin;
 
 import lombok.Getter;
 import lombok.Setter;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 
@@ -34,11 +34,11 @@ public class Admin {
 
     public void setPass(String pass) {
 
-        //if (pass.matches("^[A-Za-z0-9_-]+$")) {
-        //    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        //    this.pass = passwordEncoder.encode(pass);
-        //} else {
-        //    throw new IllegalArgumentException("passwords should only include lowercase letters, numbers, underscores, and hyphens");
-        //}
+        if (pass.matches("^[A-Za-z0-9_-]+$")) {
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            this.pass = passwordEncoder.encode(pass);
+        } else {
+            throw new IllegalArgumentException("passwords should only include lowercase letters, numbers, underscores, and hyphens");
+        }
     }
 }
