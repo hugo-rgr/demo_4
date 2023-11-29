@@ -40,11 +40,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers(WHITE_LIST_URL).permitAll()
-                .anyRequest().hasRole("ADMIN")
-                .and()
-                .formLogin(form -> form
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(req ->
+                        req.antMatchers(WHITE_LIST_URL).permitAll().anyRequest().authenticated()
+
+                ).formLogin(
+                        form -> form
                                 .loginPage("/login")
                                 .loginProcessingUrl("/login")
                                 .defaultSuccessUrl("/admin-dashboard")
