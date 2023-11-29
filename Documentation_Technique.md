@@ -8,10 +8,10 @@
 
 
 ### Technologies utilisées :
-Côté backend : Java 17 avec le framework Spring, PostgreSQL 15 pour la base de donnée.
+Côté backend : Java 8 avec le framework Spring, PostgreSQL 15 pour la base de donnée.
 Côté frontend : HTML, CSS, Javascript, Bootstrap, Thymeleaf, jQuery.
 
-Le site est hébergé sur Google Cloud.
+Le site est hébergé sur Heroku.
 La base de données est hébergée sur la plateforme Aiven.
 
 -------------
